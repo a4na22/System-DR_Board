@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>정부 정보시스템 DR Plan 검색 시스템</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Supabase JS Client CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>🏛️ 정부 정보시스템 DR Plan 검색 시스템</h1>
+      <p>중앙데이터센터 기반 5대 DR 유형별 정보시스템 사양 및 복구 목표 조회</p>
+    </header>
+
+    <!-- 검색 및 필터 영역 -->
+    <section class="controls">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="시스템명 또는 업무 특성 검색..." />
+      </div>
+      <div class="filter-buttons" id="filterContainer">
+        <button class="btn active" data-type="ALL">전체</button>
+        <button class="btn" data-type="A-A">1. A-A</button>
+        <button class="btn" data-type="A-S">2. A-S</button>
+        <button class="btn" data-type="STORAGE">3. 스토리지</button>
+        <button class="btn" data-type="NONE">4. 미대상</button>
+        <button class="btn" data-type="PPP">5. 민간이전(PPP)</button>
+      </div>
+    </section>
+
+    <!-- 카드 목록 출력 영역 -->
+    <main class="grid-container" id="systemGrid">
+      <!-- JavaScript를 통해 동적으로 로딩됩니다 -->
+    </main>
+  </div>
+
+  <script src="logic.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

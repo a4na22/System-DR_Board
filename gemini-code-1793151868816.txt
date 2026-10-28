@@ -1,0 +1,4 @@
+# API 및 환경 변수 보호
+.env
+.env.local
+config.js
