@@ -1,6 +1,5 @@
-/** JSON 정보시스템 목록 로딩, 브라우저 추가 데이터 병합 및 화면 제어. */
+/** Supabase 정보시스템 조회·등록 및 화면 제어. */
 const SYSTEM_TYPES = ['A-A', 'A-S', 'STORAGE', 'NONE', 'PPP'];
-const STORAGE_KEY = 'dr-board.custom-systems.v1';
 const SYSTEM_FIELDS = ['system_name', 'config_id', 'dr_type', 'business_type', 'data_spec', 'rpo_target', 'rto_target'];
 const gridContainer = document.getElementById('systemGrid');
 const searchInput = document.getElementById('searchInput');
@@ -8,68 +7,56 @@ const filterContainer = document.getElementById('filterContainer');
 const dialog = document.getElementById('systemDialog');
 const form = document.getElementById('systemForm');
 const saveStatus = document.getElementById('saveStatus');
-let customSystems = [];
 let currentSystems = [];
 let systemsReady = false;
-function loadStoredSystems(baseSystems) {
-  customSystems = [];
-  try {
-    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    if (!Array.isArray(stored) || !stored.every(system => isValidSystem(system, true)) ||
-        new Set(stored.map(system => system.system_id)).size !== stored.length) {
-      throw new Error('Invalid saved systems');
-    }
-    // 기존 브라우저 저장 데이터에는 구성 ID를 부여해 시스템을 그대로 유지합니다.
-    const usedIds = new Set(baseSystems.map(system => normalizeConfigId(system.config_id)));
-    for (const system of stored.filter(system => system.config_id !== undefined)) {
-      const id = normalizeConfigId(system.config_id);
-      usedIds.add(id);
-    }
-    let migrated = false;
-    for (const system of stored) {
-      if (system.config_id !== undefined) continue;
-      const base = `LEGACY-${system.system_id}`;
-      let id = base;
-      let suffix = 1;
-      while (usedIds.has(normalizeConfigId(id))) id = `${base}-${suffix++}`;
-      system.config_id = id;
-      usedIds.add(normalizeConfigId(id));
-      migrated = true;
-    }
-    customSystems = stored;
-    if (migrated) {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(customSystems));
-      } catch {
-        saveStatus.textContent = '기존 시스템에 구성 ID를 부여했으나 브라우저에 저장하지 못했습니다.';
-      }
-    }
-  } catch {
-    saveStatus.textContent = '저장된 시스템을 불러올 수 없습니다. 브라우저 저장 설정을 확인해주세요.';
-  }
-  const configIds = new Set(baseSystems.map(system => normalizeConfigId(system.config_id)));
-  const systemIds = new Set(baseSystems.map(system => system.system_id));
-  customSystems = customSystems.filter(system => {
-    const configId = normalizeConfigId(system.config_id);
-    if (configIds.has(configId) || systemIds.has(system.system_id)) return false;
-    configIds.add(configId);
-    systemIds.add(system.system_id);
-    return true;
-  });
-  return customSystems;
-}
+let store;
+let savingSystems = false;
 let activeType = 'ALL';
 let searchKeyword = '';
 
 function normalizeConfigId(id) {
   return id.trim().toUpperCase();
 }
-function isValidSystem(system, allowLegacy = false, requireCustomId = true) {
-  return system && SYSTEM_FIELDS.every(field =>
-    (allowLegacy && field === 'config_id' && system[field] === undefined) ||
-    (typeof system[field] === 'string' && system[field].trim())) &&
-    SYSTEM_TYPES.includes(system.dr_type) && typeof system.system_id === 'string' && system.system_id.trim() &&
-    (!requireCustomId || system.system_id.startsWith('CUSTOM-'));
+function isValidSystem(system) {
+  return system && SYSTEM_FIELDS.every(field => typeof system[field] === 'string' && system[field].trim()) &&
+    SYSTEM_TYPES.includes(system.dr_type) && typeof system.system_id === 'string' && system.system_id.trim();
+}
+function validateSystemList(systems) {
+  if (!Array.isArray(systems) || !systems.every(isValidSystem) ||
+      new Set(systems.map(system => system.system_id)).size !== systems.length ||
+      new Set(systems.map(system => normalizeConfigId(system.config_id))).size !== systems.length) {
+    throw new Error('Supabase 정보시스템 데이터의 필수 항목과 구성 ID 중복을 확인해주세요.');
+  }
+}
+async function saveSystems(systems) {
+  if (!systemsReady) throw new Error('시스템 목록을 먼저 불러와야 합니다.');
+  if (savingSystems) throw new Error('다른 시스템을 저장하고 있습니다. 잠시 후 다시 시도해주세요.');
+  const usedIds = new Set(currentSystems.map(system => normalizeConfigId(system.config_id)));
+  systems.forEach((system, index) => {
+    if (usedIds.has(normalizeConfigId(system.config_id))) throw new Error((index + 1) + '번째 시스템: 이미 등록되었거나 CSV 안에서 중복된 구성 ID입니다 (' + system.config_id + ').');
+    usedIds.add(normalizeConfigId(system.config_id));
+    system.system_id = 'CUSTOM-' + crypto.randomUUID();
+  });
+  validateSystemList(systems);
+  savingSystems = true;
+  const submitButton = document.getElementById('saveSystemButton');
+  submitButton.disabled = true;
+  document.getElementById('importCsvButton').disabled = true;
+  try {
+    const saved = await store.insert(systems);
+    if (saved.length !== systems.length) throw new Error('등록 결과를 확인하지 못했습니다. 목록을 새로 불러와 확인해주세요.');
+    validateSystemList(saved);
+    currentSystems = [...currentSystems, ...saved];
+    activeType = 'ALL';
+    searchKeyword = '';
+    searchInput.value = '';
+    updateView();
+    return saved;
+  } finally {
+    savingSystems = false;
+    submitButton.disabled = false;
+    document.getElementById('importCsvButton').disabled = false;
+  }
 }
 
 // 사용자 입력은 textContent로 출력하여 HTML로 실행되지 않게 합니다.
@@ -82,7 +69,7 @@ function textElement(tag, className, value) {
 function renderCards(data) {
   gridContainer.replaceChildren();
   if (!data.length) {
-    gridContainer.appendChild(textElement('p', 'empty-state', '검색 결과가 없습니다. 검색어 또는 유형을 변경해주세요.'));
+    gridContainer.appendChild(textElement('p', 'empty-state', currentSystems.length ? '검색 결과가 없습니다. 검색어 또는 유형을 변경해주세요.' : '조회된 시스템이 없습니다. 데이터 등록 여부와 조회 권한을 확인해주세요.'));
     return;
   }
   data.forEach(system => {
@@ -130,32 +117,10 @@ document.getElementById('addSystemButton').addEventListener('click', () => {
   dialog.showModal();
   form.elements.namedItem('system_name').focus();
 });
-function importCsvText(text) {
-  if (!systemsReady) throw new Error('시스템 목록을 먼저 불러와야 합니다.');
+async function importCsvText(text) {
   const systems = parseSystemsCsv(text);
-  const usedConfigIds = new Set(currentSystems.map(system => normalizeConfigId(system.config_id)));
-  const usedSystemIds = new Set(currentSystems.map(system => system.system_id));
-  let nextId = currentSystems.length + 1;
-  systems.forEach((system, index) => {
-    const configId = normalizeConfigId(system.config_id);
-    if (usedConfigIds.has(configId)) throw new Error(`${index + 2}번째 데이터 행: 이미 등록되었거나 CSV 안에서 중복된 구성 ID입니다 (${system.config_id}).`);
-    usedConfigIds.add(configId);
-    while (usedSystemIds.has(`CUSTOM-${nextId}`)) nextId++;
-    system.system_id = `CUSTOM-${nextId++}`;
-    usedSystemIds.add(system.system_id);
-  });
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([...customSystems, ...systems]));
-  } catch {
-    throw new Error('저장하지 못했습니다. 브라우저 저장 허용 설정 또는 저장 공간을 확인해주세요.');
-  }
-  customSystems = [...customSystems, ...systems];
-  currentSystems = [...currentSystems, ...systems];
-  activeType = 'ALL';
-  searchKeyword = '';
-  searchInput.value = '';
-  updateView();
-  saveStatus.textContent = `CSV로 시스템 ${systems.length}개를 추가했습니다. 이 브라우저에 저장되었습니다.`;
+  await saveSystems(systems);
+  saveStatus.textContent = 'CSV로 시스템 ' + systems.length + '개를 Supabase에 저장했습니다.';
   return systems.length;
 }
 let csvImportInProgress = false;
@@ -171,11 +136,11 @@ document.getElementById('importCsvButton').addEventListener('click', async () =>
   button.disabled = true;
   status.textContent = 'CSV 파일을 확인하고 있습니다…';
   try {
-    const count = importCsvText(await file.text());
+    const count = await importCsvText(await file.text());
     status.textContent = `${count}개 시스템을 등록했습니다. 창을 닫으면 목록에서 확인할 수 있습니다.`;
     fileInput.value = '';
   } catch (error) {
-    status.textContent = `${error.message}\n등록된 시스템은 없습니다. 파일을 수정한 후 다시 시도해주세요.`;
+    status.textContent = `${error.message}\n목록을 새로 불러와 등록 여부를 확인한 뒤 다시 시도해주세요.`;
   } finally {
     csvImportInProgress = false;
     button.disabled = false;
@@ -184,66 +149,60 @@ document.getElementById('importCsvButton').addEventListener('click', async () =>
 ['closeDialogButton', 'cancelButton'].forEach(id => {
   document.getElementById(id).addEventListener('click', () => dialog.close());
 });
-form.addEventListener('submit', event => {
+form.addEventListener('submit', async event => {
   event.preventDefault();
-  if (!systemsReady) return;
+  if (!systemsReady || savingSystems || !form.reportValidity()) return;
   const system = Object.fromEntries(SYSTEM_FIELDS.map(field => [field, form.elements.namedItem(field).value.trim()]));
-  let nextId = currentSystems.length + 1;
-  while (currentSystems.some(item => item.system_id === `CUSTOM-${nextId}`)) nextId++;
-  system.system_id = `CUSTOM-${nextId}`;
-  if (!form.reportValidity() || !isValidSystem(system)) {
+  if (SYSTEM_FIELDS.some(field => !system[field])) {
     document.getElementById('formError').textContent = '모든 항목에 공백이 아닌 내용을 입력해주세요.';
     return;
   }
-  if (currentSystems.some(item => normalizeConfigId(item.config_id) === normalizeConfigId(system.config_id))) {
-    document.getElementById('formError').textContent = '이미 등록된 구성 ID입니다. 다른 고유 식별값을 입력해주세요.';
-    form.elements.namedItem('config_id').focus();
-    return;
-  }
-  // 저장에 실패하면 폼을 유지하고 재시도할 수 있게 합니다.
+  document.getElementById('formError').textContent = 'Supabase에 저장하고 있습니다…';
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([...customSystems, system]));
-  } catch {
-    document.getElementById('formError').textContent = '저장하지 못했습니다. 브라우저 저장 허용 설정 또는 저장 공간을 확인한 뒤 다시 시도해주세요.';
-    return;
+    await saveSystems([system]);
+    dialog.close();
+    saveStatus.textContent = system.system_name + ' 시스템을 Supabase에 저장했습니다.';
+    document.getElementById('formError').textContent = '';
+  } catch (error) {
+    document.getElementById('formError').textContent = error.message;
   }
-  customSystems.push(system);
-  currentSystems.push(system);
-  activeType = 'ALL';
-  searchKeyword = '';
-  searchInput.value = '';
-  updateView();
-  dialog.close();
-  saveStatus.textContent = `${system.system_name} 시스템을 추가했습니다. 이 브라우저에서 다시 열어도 유지됩니다.`;
 });
-// JSON을 먼저 읽고 검증한 다음에만 브라우저 추가 데이터를 합칩니다.
+let loadingSystems = false;
 async function initializeSystems() {
+  if (loadingSystems || savingSystems) return;
+  loadingSystems = true;
   systemsReady = false;
   document.getElementById('addSystemButton').disabled = true;
   document.getElementById('retryLoadButton').hidden = true;
+  document.getElementById('connectionStatus').textContent = 'Supabase 연결 중…';
   gridContainer.replaceChildren();
   gridContainer.appendChild(textElement('p', 'empty-state', '시스템 목록을 불러오고 있습니다…'));
   try {
-    const response = await fetch('data/tasks.json', { cache: 'no-store' });
-    if (!response.ok) throw new Error('HTTP ' + response.status);
-    const baseSystems = await response.json();
-    if (!Array.isArray(baseSystems) || !baseSystems.every(system => isValidSystem(system, false, false)) ||
-        new Set(baseSystems.map(system => system.system_id)).size !== baseSystems.length ||
-        new Set(baseSystems.map(system => normalizeConfigId(system.config_id))).size !== baseSystems.length) {
-      throw new Error('Invalid system data');
+    if (!store) {
+      const response = await fetch('data/supabase.json', { cache: 'no-store' });
+      if (!response.ok) throw new Error('data/supabase.json 연결 설정을 읽지 못했습니다. 로컬 서버 또는 Live Server로 실행해주세요.');
+      store = createSupabaseStore(await response.json());
     }
-    saveStatus.textContent = '';
-    currentSystems = [...baseSystems, ...loadStoredSystems(baseSystems)];
+    const systems = await store.load();
+    validateSystemList(systems);
+    currentSystems = systems;
     systemsReady = true;
+    saveStatus.textContent = '';
+    document.getElementById('connectionStatus').textContent = 'Supabase 연결됨 · 공개 데모';
     updateView();
     document.getElementById('addSystemButton').disabled = false;
-  } catch {
+  } catch (error) {
+    currentSystems = [];
     gridContainer.replaceChildren();
     gridContainer.appendChild(textElement('p', 'empty-state', '시스템 목록을 불러오지 못했습니다.'));
     document.getElementById('resultCount').textContent = '목록 불러오기 실패';
-    saveStatus.textContent = 'data/tasks.json 파일을 확인해주세요. HTML을 직접 열었다면 로컬 서버 또는 Live Server로 실행해주세요.';
+    document.getElementById('connectionStatus').textContent = 'Supabase 연결 확인 필요';
+    saveStatus.textContent = error.message;
     document.getElementById('retryLoadButton').hidden = false;
+  } finally {
+    loadingSystems = false;
   }
 }
 document.getElementById('retryLoadButton').addEventListener('click', initializeSystems);
+document.getElementById('reloadSystemsButton').addEventListener('click', initializeSystems);
 const initializationPromise = initializeSystems();
