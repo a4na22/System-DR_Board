@@ -17,7 +17,7 @@
     <section class="controls">
       <div class="toolbar">
         <p id="resultCount" role="status"></p>
-        <button type="button" class="btn primary" id="addSystemButton">+ 시스템 추가</button>
+        <button type="button" class="btn primary" id="addSystemButton" disabled>+ 시스템 추가</button>
       </div>
       <div class="search-box">
         <input type="search" id="searchInput" aria-label="시스템명, 구성 ID 또는 업무 성격 검색" placeholder="시스템명, 구성 ID 또는 업무 성격 검색..." />
@@ -39,6 +39,7 @@
       </div>
     </section>
     <p id="saveStatus" role="status" class="save-status"></p>
+    <button type="button" class="btn" id="retryLoadButton" hidden>다시 불러오기</button>
 
     <dialog id="systemDialog" aria-labelledby="dialogTitle">
       <section class="csv-import" aria-labelledby="csvTitle">
@@ -89,6 +90,6 @@
   </div>
 
   <script src="gemini-code-1793151881740.js"></script>
-  <script src="gemini-code-1793151883922.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

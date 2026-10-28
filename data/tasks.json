@@ -1,0 +1,302 @@
+[
+  {
+    "system_id": "SYS-001",
+    "config_id": "CI-0001",
+    "dr_type": "A-A",
+    "system_name": "통합민원신청시스템",
+    "business_type": "민원 접수 및 처리",
+    "data_spec": "DB 2TB (PostgreSQL HA) / 피크 500 TPS [임의 설정]",
+    "rpo_target": "0초",
+    "rto_target": "수분 이내"
+  },
+  {
+    "system_id": "SYS-002",
+    "config_id": "CI-0002",
+    "dr_type": "A-A",
+    "system_name": "전자납부시스템",
+    "business_type": "세금 및 수수료 납부",
+    "data_spec": "DB 4TB (PostgreSQL HA) / 피크 1000 TPS [임의 설정]",
+    "rpo_target": "0초",
+    "rto_target": "수분 이내"
+  },
+  {
+    "system_id": "SYS-003",
+    "config_id": "CI-0003",
+    "dr_type": "A-A",
+    "system_name": "재난상황관리시스템",
+    "business_type": "재난 상황 접수 및 전파",
+    "data_spec": "DB 6TB (PostgreSQL HA) / 피크 1500 TPS [임의 설정]",
+    "rpo_target": "0초",
+    "rto_target": "수분 이내"
+  },
+  {
+    "system_id": "SYS-004",
+    "config_id": "CI-0004",
+    "dr_type": "A-A",
+    "system_name": "긴급알림전송시스템",
+    "business_type": "긴급 안내 메시지 발송",
+    "data_spec": "DB 8TB (PostgreSQL HA) / 피크 2000 TPS [임의 설정]",
+    "rpo_target": "0초",
+    "rto_target": "수분 이내"
+  },
+  {
+    "system_id": "SYS-005",
+    "config_id": "CI-0005",
+    "dr_type": "A-A",
+    "system_name": "통합인증시스템",
+    "business_type": "사용자 인증 및 세션 관리",
+    "data_spec": "DB 10TB (PostgreSQL HA) / 피크 2500 TPS [임의 설정]",
+    "rpo_target": "0초",
+    "rto_target": "수분 이내"
+  },
+  {
+    "system_id": "SYS-006",
+    "config_id": "CI-0006",
+    "dr_type": "A-A",
+    "system_name": "행정정보중계시스템",
+    "business_type": "기관 간 행정정보 연계",
+    "data_spec": "DB 12TB (PostgreSQL HA) / 피크 3000 TPS [임의 설정]",
+    "rpo_target": "0초",
+    "rto_target": "수분 이내"
+  },
+  {
+    "system_id": "SYS-007",
+    "config_id": "CI-0007",
+    "dr_type": "A-S",
+    "system_name": "예산회계관리시스템",
+    "business_type": "예산 편성 및 회계 처리",
+    "data_spec": "DB 2TB (PostgreSQL) / 피크 500 TPS [임의 설정]",
+    "rpo_target": "수분 이내",
+    "rto_target": "수시간 이내"
+  },
+  {
+    "system_id": "SYS-008",
+    "config_id": "CI-0008",
+    "dr_type": "A-S",
+    "system_name": "인사급여관리시스템",
+    "business_type": "인사 및 급여 관리",
+    "data_spec": "DB 4TB (PostgreSQL) / 피크 1000 TPS [임의 설정]",
+    "rpo_target": "수분 이내",
+    "rto_target": "수시간 이내"
+  },
+  {
+    "system_id": "SYS-009",
+    "config_id": "CI-0009",
+    "dr_type": "A-S",
+    "system_name": "전자결재시스템",
+    "business_type": "행정 문서 결재",
+    "data_spec": "DB 6TB (PostgreSQL) / 피크 1500 TPS [임의 설정]",
+    "rpo_target": "수분 이내",
+    "rto_target": "수시간 이내"
+  },
+  {
+    "system_id": "SYS-010",
+    "config_id": "CI-0010",
+    "dr_type": "A-S",
+    "system_name": "계약관리시스템",
+    "business_type": "계약 체결 및 이행 관리",
+    "data_spec": "DB 8TB (PostgreSQL) / 피크 2000 TPS [임의 설정]",
+    "rpo_target": "수분 이내",
+    "rto_target": "수시간 이내"
+  },
+  {
+    "system_id": "SYS-011",
+    "config_id": "CI-0011",
+    "dr_type": "A-S",
+    "system_name": "시설물관리시스템",
+    "business_type": "공공시설 점검 및 유지보수",
+    "data_spec": "DB 10TB (PostgreSQL) / 피크 2500 TPS [임의 설정]",
+    "rpo_target": "수분 이내",
+    "rto_target": "수시간 이내"
+  },
+  {
+    "system_id": "SYS-012",
+    "config_id": "CI-0012",
+    "dr_type": "A-S",
+    "system_name": "보조금관리시스템",
+    "business_type": "보조금 신청 및 집행 관리",
+    "data_spec": "DB 12TB (PostgreSQL) / 피크 3000 TPS [임의 설정]",
+    "rpo_target": "수분 이내",
+    "rto_target": "수시간 이내"
+  },
+  {
+    "system_id": "SYS-013",
+    "config_id": "CI-0013",
+    "dr_type": "STORAGE",
+    "system_name": "행정문서보관시스템",
+    "business_type": "행정 문서 장기 보관",
+    "data_spec": "SAN/NAS 20TB / 블록 복제 [임의 설정]",
+    "rpo_target": "수시간",
+    "rto_target": "수일~수주 이내"
+  },
+  {
+    "system_id": "SYS-014",
+    "config_id": "CI-0014",
+    "dr_type": "STORAGE",
+    "system_name": "공간정보저장시스템",
+    "business_type": "지도 및 공간정보 저장",
+    "data_spec": "SAN/NAS 40TB / 블록 복제 [임의 설정]",
+    "rpo_target": "수시간",
+    "rto_target": "수일~수주 이내"
+  },
+  {
+    "system_id": "SYS-015",
+    "config_id": "CI-0015",
+    "dr_type": "STORAGE",
+    "system_name": "공공영상보관시스템",
+    "business_type": "공공 영상 기록 보관",
+    "data_spec": "SAN/NAS 60TB / 블록 복제 [임의 설정]",
+    "rpo_target": "수시간",
+    "rto_target": "수일~수주 이내"
+  },
+  {
+    "system_id": "SYS-016",
+    "config_id": "CI-0016",
+    "dr_type": "STORAGE",
+    "system_name": "통계원천자료시스템",
+    "business_type": "통계 원천 데이터 보관",
+    "data_spec": "SAN/NAS 80TB / 블록 복제 [임의 설정]",
+    "rpo_target": "수시간",
+    "rto_target": "수일~수주 이내"
+  },
+  {
+    "system_id": "SYS-017",
+    "config_id": "CI-0017",
+    "dr_type": "STORAGE",
+    "system_name": "전자기록관리시스템",
+    "business_type": "전자 기록물 관리",
+    "data_spec": "SAN/NAS 100TB / 블록 복제 [임의 설정]",
+    "rpo_target": "수시간",
+    "rto_target": "수일~수주 이내"
+  },
+  {
+    "system_id": "SYS-018",
+    "config_id": "CI-0018",
+    "dr_type": "STORAGE",
+    "system_name": "공공도서자료시스템",
+    "business_type": "디지털 도서 및 자료 보관",
+    "data_spec": "SAN/NAS 120TB / 블록 복제 [임의 설정]",
+    "rpo_target": "수시간",
+    "rto_target": "수일~수주 이내"
+  },
+  {
+    "system_id": "SYS-019",
+    "config_id": "CI-0019",
+    "dr_type": "NONE",
+    "system_name": "정책홍보게시판",
+    "business_type": "정책 소식 및 홍보 자료 게시",
+    "data_spec": "DB 2TB (PostgreSQL) / 피크 500 TPS [임의 설정]",
+    "rpo_target": "DR 적용 면제 (백업 기반 수동 복구)",
+    "rto_target": "DR 적용 면제 (백업 기반 수동 복구)"
+  },
+  {
+    "system_id": "SYS-020",
+    "config_id": "CI-0020",
+    "dr_type": "NONE",
+    "system_name": "직원동호회게시판",
+    "business_type": "직원 동호회 활동 안내",
+    "data_spec": "DB 4TB (PostgreSQL) / 피크 1000 TPS [임의 설정]",
+    "rpo_target": "DR 적용 면제 (백업 기반 수동 복구)",
+    "rto_target": "DR 적용 면제 (백업 기반 수동 복구)"
+  },
+  {
+    "system_id": "SYS-021",
+    "config_id": "CI-0021",
+    "dr_type": "NONE",
+    "system_name": "교육일정안내시스템",
+    "business_type": "교육 일정 및 장소 안내",
+    "data_spec": "DB 6TB (PostgreSQL) / 피크 1500 TPS [임의 설정]",
+    "rpo_target": "DR 적용 면제 (백업 기반 수동 복구)",
+    "rto_target": "DR 적용 면제 (백업 기반 수동 복구)"
+  },
+  {
+    "system_id": "SYS-022",
+    "config_id": "CI-0022",
+    "dr_type": "NONE",
+    "system_name": "행사사진게시판",
+    "business_type": "행사 사진 공유",
+    "data_spec": "DB 8TB (PostgreSQL) / 피크 2000 TPS [임의 설정]",
+    "rpo_target": "DR 적용 면제 (백업 기반 수동 복구)",
+    "rto_target": "DR 적용 면제 (백업 기반 수동 복구)"
+  },
+  {
+    "system_id": "SYS-023",
+    "config_id": "CI-0023",
+    "dr_type": "NONE",
+    "system_name": "구내식당안내시스템",
+    "business_type": "식단 및 운영 시간 안내",
+    "data_spec": "DB 10TB (PostgreSQL) / 피크 2500 TPS [임의 설정]",
+    "rpo_target": "DR 적용 면제 (백업 기반 수동 복구)",
+    "rto_target": "DR 적용 면제 (백업 기반 수동 복구)"
+  },
+  {
+    "system_id": "SYS-024",
+    "config_id": "CI-0024",
+    "dr_type": "NONE",
+    "system_name": "내부설문게시판",
+    "business_type": "내부 의견 수렴",
+    "data_spec": "DB 12TB (PostgreSQL) / 피크 3000 TPS [임의 설정]",
+    "rpo_target": "DR 적용 면제 (백업 기반 수동 복구)",
+    "rto_target": "DR 적용 면제 (백업 기반 수동 복구)"
+  },
+  {
+    "system_id": "SYS-025",
+    "config_id": "CI-0025",
+    "dr_type": "PPP",
+    "system_name": "대국민설문플랫폼",
+    "business_type": "대국민 온라인 설문",
+    "data_spec": "DB 2TB (PostgreSQL) / 피크 500 TPS [임의 설정]",
+    "rpo_target": "민간 클라우드 이전 계획에 따름",
+    "rto_target": "민간 클라우드 이전 계획에 따름"
+  },
+  {
+    "system_id": "SYS-026",
+    "config_id": "CI-0026",
+    "dr_type": "PPP",
+    "system_name": "공공교육플랫폼",
+    "business_type": "온라인 교육 콘텐츠 제공",
+    "data_spec": "DB 4TB (PostgreSQL) / 피크 1000 TPS [임의 설정]",
+    "rpo_target": "민간 클라우드 이전 계획에 따름",
+    "rto_target": "민간 클라우드 이전 계획에 따름"
+  },
+  {
+    "system_id": "SYS-027",
+    "config_id": "CI-0027",
+    "dr_type": "PPP",
+    "system_name": "행사예약플랫폼",
+    "business_type": "공공 행사 예약 및 접수",
+    "data_spec": "DB 6TB (PostgreSQL) / 피크 1500 TPS [임의 설정]",
+    "rpo_target": "민간 클라우드 이전 계획에 따름",
+    "rto_target": "민간 클라우드 이전 계획에 따름"
+  },
+  {
+    "system_id": "SYS-028",
+    "config_id": "CI-0028",
+    "dr_type": "PPP",
+    "system_name": "관광정보플랫폼",
+    "business_type": "지역 관광 정보 제공",
+    "data_spec": "DB 8TB (PostgreSQL) / 피크 2000 TPS [임의 설정]",
+    "rpo_target": "민간 클라우드 이전 계획에 따름",
+    "rto_target": "민간 클라우드 이전 계획에 따름"
+  },
+  {
+    "system_id": "SYS-029",
+    "config_id": "CI-0029",
+    "dr_type": "PPP",
+    "system_name": "공공데이터분석플랫폼",
+    "business_type": "공공데이터 분석 및 시각화",
+    "data_spec": "DB 10TB (PostgreSQL) / 피크 2500 TPS [임의 설정]",
+    "rpo_target": "민간 클라우드 이전 계획에 따름",
+    "rto_target": "민간 클라우드 이전 계획에 따름"
+  },
+  {
+    "system_id": "SYS-030",
+    "config_id": "CI-0030",
+    "dr_type": "PPP",
+    "system_name": "시민참여플랫폼",
+    "business_type": "시민 제안 및 참여 접수",
+    "data_spec": "DB 12TB (PostgreSQL) / 피크 3000 TPS [임의 설정]",
+    "rpo_target": "민간 클라우드 이전 계획에 따름",
+    "rto_target": "민간 클라우드 이전 계획에 따름"
+  }
+]
